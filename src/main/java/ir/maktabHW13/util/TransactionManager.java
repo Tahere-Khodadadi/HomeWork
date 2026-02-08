@@ -6,16 +6,17 @@ import jakarta.persistence.EntityTransaction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class TransactionHandler {
+public class TransactionManager {
 
+    static JpaApplication jpaApplication = new JpaApplication();
 
-    public static <T> T execute(Function<EntityManager,T> action) {
-        EntityManager entityManager = JpaApplication.getEntityManagerFactory()
+    public static <T> T execute(Function<EntityManager, T> action) {
+        EntityManager entityManager = jpaApplication.getEntityManagerFactory()
                 .createEntityManager();
         EntityTransaction entityTransaction = entityManager.getTransaction();
         try {
             entityTransaction.begin();
-            T result=action.apply(entityManager);
+            T result = action.apply(entityManager);
             entityTransaction.commit();
             return result;
         } catch (RuntimeException e) {
@@ -27,6 +28,7 @@ public class TransactionHandler {
         }
 
     }
+
     public static void executeForPersist(Consumer<EntityManager> action) {
         execute(em -> {
             action.accept(em);
@@ -34,17 +36,26 @@ public class TransactionHandler {
         });
     }
 
-    public void deleteQuery() {
+    public  static <T> void deleteQuery(Class<T> entityClass, Long id) {
+
+        executeForPersist(em -> {
+            T entity = em.find(entityClass, id);
+            em.remove(entity);
+        });
+
 
     }
 
-    public static  <T> T findQuery(Class<T> tClass, Object id) {
+
+    public static <T> T findQuery(Class<T> tClass, Object id) {
         return execute(entityManager -> entityManager.find(tClass, id));
     }
-public static   <T> void updateQuery(T entity) {
-    execute(entityManager ->
 
-            entityManager.merge(entity));
-}
+    public static <T> void updateQuery(T entity) {
+        execute(entityManager ->
+
+                entityManager.merge(entity));
+    }
+
 
 }

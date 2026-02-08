@@ -4,7 +4,9 @@ package ir.maktabHW13.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -12,7 +14,6 @@ import lombok.ToString;
 @Getter
 
 @Inheritance(strategy = InheritanceType.JOINED)
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,15 +36,28 @@ public class User {
    @Column(nullable = false)
     private UserStatus userStatus=UserStatus.Pending;
 
+   @Column(nullable = false)
+   private String code;
+
+
+   @ManyToMany (mappedBy = "students")
+   private Set<Course> studentCourses = new HashSet<>();
+
+
+   @OneToMany(mappedBy = "teacher")
+   private Set<Course> teachingCourses = new HashSet<>();
+
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", password='" + password + '\'' +
-                ", roles=" + roles +
-                ", userStatus=" + userStatus +
-                '}';
+        return " User { " +
+                "id = " + id +
+                ", firstName = '" + firstName + '\'' +
+                ", lastName = '" + lastName + '\'' +
+                ", password = '" + password + '\'' +
+                ", roles = " + roles +'\''+
+                ", userStatus = " + userStatus +'\''+
+                ", code = '" + code + '\'' +
+                " } ";
     }
 }
+//cascade when we use that do changing in parent you want effect on children

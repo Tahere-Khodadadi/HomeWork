@@ -4,10 +4,15 @@ import ir.maktabHW13.model.User;
 
 import java.util.List;
 
-public interface UserRepository {
-     <T> void save(T entity);
-    <T> User update(T entity);
-    List <User>  findAll(User user );
-    <T>  T findById(Class <T> tClass,Object id);
+public interface UserRepository extends BaseRepository {
+
+
     User findByName(String userName);
+
+    List<User> findByInput(User filter);
+
+    void changeRoles(String name);
+
+
+    User login(String firstName, String password);
 }

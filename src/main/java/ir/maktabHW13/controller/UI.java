@@ -1,44 +1,49 @@
 package ir.maktabHW13.controller;
 
 import ir.maktabHW13.dto.UserSignUpDTO;
-import ir.maktabHW13.model.Roles;
-import ir.maktabHW13.model.User;
+import ir.maktabHW13.model.*;
 import ir.maktabHW13.repository.UserRepository;
 import ir.maktabHW13.repository.UserRepositoryImpl;
+import ir.maktabHW13.service.CourseServiceImpl;
 import ir.maktabHW13.service.UserServiceImpl;
 import ir.maktabHW13.util.JpaApplication;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
 public class UI {
-    private UserServiceImpl userService;
-    private UserRepository userRepository;
+    private final UserServiceImpl userService;
+    private final UserRepository userRepository;
+    private final CourseServiceImpl courseService;
 
 
     Scanner scanner = new Scanner(System.in);
 
-    public UI(UserServiceImpl userService) {
+    public UI(UserServiceImpl userService, CourseServiceImpl courseService) {
         this.userService = userService;
         this.userRepository = new UserRepositoryImpl(new JpaApplication());
+        this.courseService = courseService;
     }
 
 
     public void StartMenu() {
         while (true) {
             System.out.println("---WelCome to My Program-----");
-            System.out.println("1. SignUp New User : ");
+            System.out.println("1. Users : ");
             System.out.println("2. login Admin : ");
-            System.out.println("3. Exit :");
+            System.out.println("3. Courses ");
+            System.out.println("4. Exit :");
             System.out.print("Choose an option: ");
 
             int choice = scanner.nextInt();
             scanner.nextLine();
 
             switch (choice) {
-                case 1 -> SignupNewUser();
+                case 1 -> Users();
                 case 2 -> LoginAdmin();
-                case 3 -> {
+                case 3 -> Courses();
+                case 4 -> {
                     System.out.println("Exit");
 
                     return;
@@ -51,7 +56,120 @@ public class UI {
 
     }
 
-    private void SignupNewUser() {
+    private void Courses() {
+        System.out.println(" ------------ Courses Pages -------");
+        System.out.println("1. Add Course : ");
+        addCourse();
+    }
+
+
+    private void Users() {
+
+        while (true) {
+            System.out.println("---Users Page -----");
+            System.out.println("1. Sign Up  : ");
+            System.out.println("2. Login  : ");
+            System.out.println("3. Exit: ");
+            System.out.print(" Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> signUpNewUser();
+                case 2 -> loginUsers();
+                case 3 -> {
+                    System.out.println(" Exit ");
+                    return;
+                }
+                default -> System.out.println("Invalid option .");
+            }
+        }
+
+    }
+
+
+    private void teacherDashboards(Long teacherId) {
+        while (true) {
+
+            System.out.println(" Teacher Dashboards: ");
+            System.out.println(" 1. Show All Teacher Courses Page: ");
+            System.out.println(" 2.  Page: ");
+            System.out.println(" 3. Exit: ");
+            System.out.println(" Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> showAllTeacherCourses(teacherId);
+                case 2 -> {
+                    System.out.println(" Exit ");
+                    return;
+                }
+                default -> System.out.println("Invalid option .");
+
+            }
+        }
+    }
+
+    private void showAllTeacherCourses(Long teacherId) {
+        System.out.println(" ----------- Show All Teacher Courses -------");
+
+        try {
+
+            List<Course> courses = courseService.showTeacherCourse(teacherId);
+            for (Course listCourses : courses) {
+                System.out.println(" list courses are : ");
+                System.out.println(listCourses);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(" error for show All Teacher Courses : " + ex.getMessage());
+        }
+
+
+    }
+
+    private Long loginUsers() {
+        System.out.println("---- Login Users ----");
+        System.out.print("Enter your username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter your password: ");
+        String password = scanner.nextLine();
+
+        try {
+            Long userId = userService.login(username, password);
+
+            if (userId == null) {
+                System.out.println("Invalid username or password.");
+                return null;
+            }
+
+            User user = userRepository.findById(User.class,userId);
+            if (user == null) {
+                System.out.println("User not found.");
+                return null;
+            }
+
+            if (Roles.Teacher.equals(user.getRoles())) {
+                teacherDashboards(userId);
+            } else if (Roles.Student.equals(user.getRoles())) {
+                studentDashboard(userId);
+            } else {
+                System.out.println("not found any roles ");
+            }
+
+            return userId;
+
+        } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    private void studentDashboard(Long userId) {
+    }
+
+
+    private void signUpNewUser() {
         UserSignUpDTO dto = new UserSignUpDTO();
 
         System.out.println("--- Registration ---");
@@ -66,6 +184,7 @@ public class UI {
 
         System.out.print("Enter Password: ");
         dto.setPassword(scanner.nextLine());
+
 
         if (roleInput.equalsIgnoreCase("Teacher")) {
             dto.setRoles(Roles.Teacher);
@@ -106,38 +225,216 @@ public class UI {
 
     private void adminMenu() {
 
-        System.out.println("------------- Users Management System  -----------");
-        System.out.println("1. Show All Users");
-        System.out.println("2. Change StatusUser : ");
-        System.out.println("3. Edit  User Information : ");
-        System.out.println("4. Exit : ");
-        System.out.print("Choose an option: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-        switch (choice) {
-            case 1 -> showAllUsers();
-            case 2 -> changeStatus();
-            case 3 -> ediInfoUsers();
-            case 4 -> {
-                System.out.println("Exit");
-                return;
+        while (true) {
+            System.out.println("------------- Users Management System  -----------");
+            System.out.println("1. Show All Users");
+            System.out.println("2. Change StatusUser : ");
+            System.out.println("3. Edit  User Information : ");
+            System.out.println("4. Filtering User : ");
+            System.out.println("5. Change Roles : ");
+            System.out.println("6. Remove User : ");
+            System.out.println("7. Show Courses : ");
+            System.out.println("8. Edit Info Courses : ");
+            System.out.println("9. Add Teacher To Course : ");
+            System.out.println("10. Add Student To Course : ");
+            System.out.println("11. Remove Courses : ");
+            System.out.println("12. Show Detail Courses : ");
+            System.out.println("13. Exit : ");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> showAllUsers();
+                case 2 -> changeStatus();
+                case 3 -> ediInfoUsers();
+                case 4 -> filterUsers();
+                case 5 -> changeRoles();
+                case 6 -> removeUser();
+                case 7 -> showAllCourses();
+                case 8 -> editInfoCourses();
+                case 9 -> addTeacherToCourse();
+                case 10 -> addStudentToCourse();
+                case 11 -> removeCourse();
+                case 12 -> showDetailCourse();
+                case 13 -> {
+                    System.out.println("Exit");
+                    return;
+                }
+
+                default -> System.out.println("Invalid option .");
+
             }
-
-            default -> System.out.println("Invalid option .");
-
         }
     }
 
-    private void ediInfoUsers() {
-        System.out.println("------------- User Information ------------");
-        System.out.println("Enter first name for edit user: ");
+    private void removeCourse() {
+        System.out.println("--- Remove Course ---");
+        System.out.println("Enter Course Code : ");
+        Long courseCode = scanner.nextLong();
+        courseService.removeCourses(courseCode);
+    }
+
+    private void editInfoCourses() {
+        System.out.println("--- Edit Courses ----");
+        System.out.println(" Enter CourseId for Edit");
         Long id = scanner.nextLong();
 
-        User existingUser= userRepository.findById(User.class,id);
+        Course exitingCourse = userRepository.findById(Course.class, id);
+        if (exitingCourse == null) {
+            System.out.println("User not found!");
+        }
+
+        System.out.println(" Information Of currentCourse" + exitingCourse);
+        System.out.print("New Title: ");
+        String newName = scanner.next();
+        exitingCourse.setTitle(newName);
+
+        System.out.print("New Identifier: ");
+        String newLastName = scanner.next();
+        exitingCourse.setIdentifier(newLastName);
+
+        System.out.print("New startDate: ");
+        LocalDate newStartDate = LocalDate.parse(scanner.next());
+        exitingCourse.setStartDate(newStartDate);
+
+        System.out.print("New EndDate: ");
+        LocalDate newEndDate = LocalDate.parse(scanner.next());
+        exitingCourse.setEndDate(newEndDate);
+        scanner.nextLine();
+        courseService.updateCourse(exitingCourse);
+
+        System.out.println("update successful!");
+
+
+    }
+
+
+    private void removeUser() {
+        System.out.println("--- Delete User ----");
+        System.out.println("Enter userId for delete user : ");
+        Long userId = scanner.nextLong();
+
+        userService.remove(userId);
+    }
+
+    private void changeRoles() {
+        System.out.print("Enter Name : ");
+        String name = scanner.nextLine();
+
+        userService.changeRoles(name);
+    }
+
+    private void addTeacherToCourse() {
+
+        System.out.println("--- Add Teacher to Course ---");
+
+        System.out.print("Enter Teacher Id: ");
+        String teacherId = scanner.nextLine();
+
+        System.out.print("Enter Course Id: ");
+        String courseId = scanner.nextLine();
+
+        courseService.addTeacherToCourse(courseId, teacherId);
+        System.out.println("Course added successfully!");
+    }
+
+    private void showAllCourses() {
+        List<Course> course = courseService.findAll();
+        for (Course courses : course) {
+            System.out.println(courses);
+        }
+
+    }
+
+    private void addStudentToCourse() {
+        System.out.println("--- Add Student to Course ---");
+        System.out.print("Enter Student Id: ");
+        String studentId = scanner.nextLine();
+        System.out.print("Enter Course Id: ");
+        String courseId = scanner.nextLine();
+
+        courseService.addStudentToCourse(courseId, studentId);
+        System.out.println("Student successfully added");
+    }
+
+    private void addCourse() {
+        Course course = new Course();
+        System.out.println("--- Add Course ---");
+        System.out.println("Enter Course Title: ");
+        String title = scanner.nextLine();
+        course.setTitle(title);
+
+        System.out.println("Enter Corse Code: ");
+        String courseCode = scanner.nextLine();
+        course.setIdentifier(courseCode);
+
+        System.out.println("Enter Course StartDate: ");
+        LocalDate startDate = LocalDate.parse(scanner.nextLine());
+        course.setStartDate(startDate);
+
+        System.out.println("Enter Course EndDate: ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine());
+        course.setEndDate(endDate);
+
+        courseService.addCourse(course);
+
+    }
+
+    private void filterUsers() {
+        System.out.println("--------- Filtering Users ----------");
+        System.out.println("Search by: (1. FirstName | 2. LastName | 3. Role | 4. Status)");
+        String choice = scanner.nextLine();
+
+        User user = new User();
+        user.setUserStatus(null);
+
+        if (choice.equals("1")) {
+            System.out.print("Enter First Name: ");
+            user.setFirstName(scanner.nextLine().trim());
+        } else if (choice.equals("2")) {
+            System.out.print("Enter Last Name: ");
+            user.setLastName(scanner.nextLine().trim());
+
+
+        } else if (choice.equals("3")) {
+            System.out.print("Enter Role (Teacher/Student): ");
+            String roleInput = scanner.nextLine().trim();
+
+            try {
+                user.setRoles(Roles.valueOf(roleInput));
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid Role! Use Teacher or Student.");
+                return;
+            }
+        } else if (choice.equals("4")) {
+            System.out.println("Enter Status (Approved/Rejected/Pending): ");
+            String statusInput = scanner.nextLine().trim();
+
+
+            try {
+                user.setUserStatus(UserStatus.valueOf(statusInput));
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid Status.");
+            }
+        }
+
+        List<User> results = userService.searchByInput(user);
+        System.out.println(results);
+        scanner.nextLine();
+    }
+
+
+    private void ediInfoUsers() {
+        System.out.println("------------- User Information ------------");
+        System.out.println("Enter id for edit user: ");
+        Long id = scanner.nextLong();
+
+        User existingUser = userRepository.findById(User.class, id);
         if (existingUser == null) {
             System.out.println("User not found!");
         }
-        System.out.println(" Information Of currentUser"+existingUser);
+
+        System.out.println(" Information Of currentUser" + existingUser);
         System.out.print("New First Name: ");
         String newName = scanner.next();
         existingUser.setFirstName(newName);
@@ -151,26 +448,10 @@ public class UI {
         existingUser.setPassword(newPassword);
         scanner.nextLine();
 
-        System.out.println("Do you want to change Role :  y/n ");
-        String answer = scanner.nextLine();
-
-        if (answer.equalsIgnoreCase("y")) {
-
-            if (Roles.Teacher.equals(existingUser.getRoles())) {
-                existingUser.setRoles(Roles.Student);
-            } else if (Roles.Student.equals(existingUser.getRoles())) {
-                existingUser.setRoles(Roles.Teacher);
-            }
-        }
-            else {
-                existingUser.setRoles(existingUser.getRoles());
-            }
-
-
-        userService.update(existingUser);
-
+        userService.updateUser(existingUser);
 
         System.out.println("update successful!");
+
 
     }
 
@@ -194,5 +475,13 @@ public class UI {
             System.out.println(user);
         }
 
+    }
+
+    private void showDetailCourse() {
+        System.out.println("--- Show Detail Course ---");
+        System.out.println("Enter Course Id: ");
+        Long courseId = scanner.nextLong();
+
+        courseService.showDetailCourse(courseId);
     }
 }

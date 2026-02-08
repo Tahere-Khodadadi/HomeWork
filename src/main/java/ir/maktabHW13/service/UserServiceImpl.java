@@ -3,16 +3,16 @@ package ir.maktabHW13.service;
 import ir.maktabHW13.dto.UserSignUpDTO;
 import ir.maktabHW13.model.*;
 import ir.maktabHW13.repository.UserRepository;
-import ir.maktabHW13.util.TransactionHandler;
+import ir.maktabHW13.util.TransactionManager;
 import ir.maktabHW13.util.Validation;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.EntityManager;
 
 import java.util.List;
-
+import java.util.Optional;
 
 public class UserServiceImpl implements UserService {
+    private UserRepository userRepository;
 
-    private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -23,11 +23,11 @@ public class UserServiceImpl implements UserService {
     public void signUp(UserSignUpDTO dto) {
         User user;
         if (dto.getRoles() == Roles.Teacher) {
-            user = new Teacher();
-            ((Teacher) user).setTeacherId(dto.getSpecialCode());
+            user = new User();
+            ((User) user).setCode(dto.getSpecialCode());
         } else {
-            user = new Student();
-            ((Student) user).setStudentId(dto.getSpecialCode());
+            user = new User();
+            ((User) user).setCode(dto.getSpecialCode());
         }
 
         user.setFirstName(dto.getFirstName());
@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
         Validation.validators(user);
         userRepository.save(user);
     }
-
 
     @Override
     public void SignUpAdmin() {
@@ -54,43 +53,17 @@ public class UserServiceImpl implements UserService {
         adminToEntity.setRoles(Roles.Admin);
 
 
-        TransactionHandler.execute(entityManager -> {
+        TransactionManager.execute(entityManager -> {
                     entityManager.persist(adminToEntity);
                     return entityManager;
                 }
         );
     }
 
-
-    @Override
-    public List<User> findAll() {
-        return
-                TransactionHandler.execute(entityManager ->
-                        entityManager.createQuery("select u from User u", User.class)
-                                .getResultList()
-
-                );
-
-    }
-
-    @Override
-    public User update(User user) {
-        User existingUser = userRepository.findById(User.class, user.getId());
-        if (existingUser != null) {
-            existingUser.setFirstName(user.getFirstName());
-            existingUser.setLastName(user.getLastName());
-            existingUser.setPassword(user.getPassword());
-            existingUser.setRoles(user.getRoles());
-            return userRepository.update(existingUser);
-
-        }
-        return null;
-    }
-
     @Override
     public List<User> approvedUsersByAdmin() {
         return
-                TransactionHandler.execute(entityManager ->
+                TransactionManager.execute(entityManager ->
                 {
                     List<User> pendingUsers =
                             entityManager.createQuery("select u from User u where u.userStatus =: status ", User.class)
@@ -111,6 +84,66 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll(User.class);
+    }
 
+    @Override
+    public User updateUser(User user) {
+
+        User existingUser = userRepository.findById(User.class, user.getId());
+        if (existingUser != null) {
+            existingUser.setFirstName(user.getFirstName());
+            existingUser.setLastName(user.getLastName());
+            existingUser.setPassword(user.getPassword());
+            existingUser.setRoles(user.getRoles());
+            return userRepository.update(existingUser);
+
+        }
+        return null;
+    }
+
+    @Override
+    public List<User> searchByInput(User user) {
+        System.out.println("Service receiving search for: " + user.getFirstName()); // دیباگ
+        return userRepository.findByInput(user);
+    }
+
+    @Override
+    public void changeRoles(String name) {
+        userRepository.changeRoles(name);
+    }
+
+    @Override
+    public Long login(String firstName, String password) {
+
+        if (firstName == null || firstName.isEmpty() || password == null || password.isEmpty()) {
+            System.out.println(" username or password is null or empty.");
+        }
+        try {
+
+            User user = userRepository.login(firstName, password);
+            System.out.println("logged in successfully");
+
+            return  user.getId();
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid username or password.");
+        }
+    }
+    @Override
+    public void remove(Long userId) {
+        User user = userRepository.findById(User.class, userId);
+        if (user == null) {
+            System.out.println("user not found");
+            return;
+        }
+    try {
+        userRepository.remove(userId);
+        System.out.println("user removed successfully");
+    }
+    catch (Exception e) {
+        throw new RuntimeException("user could not be removed");
+    }
+    }
 }
-
