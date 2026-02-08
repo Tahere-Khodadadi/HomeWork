@@ -8,7 +8,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -48,7 +50,8 @@ public class Course   {
     @JoinColumn(name = "teacher_id",nullable = true)
     private User teacher;
 
-
+    @OneToMany(mappedBy = "course")
+    private List<Exam> exams;
 
     @Override
     public int hashCode() {
@@ -74,4 +77,4 @@ public class Course   {
 
                 '}';
     }
-}
+    }

@@ -92,7 +92,7 @@ public class UI {
 
             System.out.println(" Teacher Dashboards: ");
             System.out.println(" 1. Show All Teacher Courses Page: ");
-            System.out.println(" 2.  Page: ");
+            System.out.println(" 2. Show All Course Exam Page: ");
             System.out.println(" 3. Exit: ");
             System.out.println(" Choose an option: ");
 
@@ -100,7 +100,8 @@ public class UI {
             scanner.nextLine();
             switch (choice) {
                 case 1 -> showAllTeacherCourses(teacherId);
-                case 2 -> {
+                case 2 -> showCourseExam();
+                case 3 -> {
                     System.out.println(" Exit ");
                     return;
                 }
@@ -108,6 +109,9 @@ public class UI {
 
             }
         }
+    }
+
+    private void showCourseExam() {
     }
 
     private void showAllTeacherCourses(Long teacherId) {
@@ -142,7 +146,7 @@ public class UI {
                 return null;
             }
 
-            User user = userRepository.findById(User.class,userId);
+            User user = userRepository.findById(User.class, userId);
             if (user == null) {
                 System.out.println("User not found.");
                 return null;
