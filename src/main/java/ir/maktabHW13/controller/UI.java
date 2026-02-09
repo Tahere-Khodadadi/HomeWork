@@ -2,9 +2,9 @@ package ir.maktabHW13.controller;
 
 import ir.maktabHW13.dto.UserSignUpDTO;
 import ir.maktabHW13.model.*;
-import ir.maktabHW13.repository.UserRepository;
-import ir.maktabHW13.repository.UserRepositoryImpl;
+import ir.maktabHW13.repository.*;
 import ir.maktabHW13.service.CourseServiceImpl;
+import ir.maktabHW13.service.ExamServiceImpl;
 import ir.maktabHW13.service.UserServiceImpl;
 import ir.maktabHW13.util.JpaApplication;
 
@@ -16,14 +16,17 @@ public class UI {
     private final UserServiceImpl userService;
     private final UserRepository userRepository;
     private final CourseServiceImpl courseService;
-
+    private final ExamServiceImpl examService;
 
     Scanner scanner = new Scanner(System.in);
 
-    public UI(UserServiceImpl userService, CourseServiceImpl courseService) {
+    public UI(UserServiceImpl userService, CourseServiceImpl courseService, ExamServiceImpl examService) {
         this.userService = userService;
+
         this.userRepository = new UserRepositoryImpl(new JpaApplication());
         this.courseService = courseService;
+        this.examService = examService;
+
     }
 
 
@@ -92,23 +95,120 @@ public class UI {
 
             System.out.println(" Teacher Dashboards: ");
             System.out.println(" 1. Show All Teacher Courses Page: ");
-            System.out.println(" 2. Show All Course Exam Page: ");
-            System.out.println(" 3. Exit: ");
+            System.out.println(" 2. Exam Pages : ");
+            System.out.println(" 3. Show All Course Exam Page: ");
+            System.out.println(" 4. Exit: ");
             System.out.println(" Choose an option: ");
 
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
                 case 1 -> showAllTeacherCourses(teacherId);
-                case 2 -> showCourseExam();
-                case 3 -> {
+                case 2 -> examPage();
+                case 3 -> showCourseExam();
+                case 4 -> {
                     System.out.println(" Exit ");
                     return;
                 }
                 default -> System.out.println("Invalid option .");
 
             }
+            scanner.nextLine();
         }
+    }
+
+    private void examPage() {
+        System.out.println(" ------------ Exam Pages --------");
+        System.out.println("1. Add Exam  : ");
+        System.out.println("2. Remove Exam : ");
+        System.out.println("3. Update Exam : ");
+        System.out.println("4. Exit: ");
+        System.out.println(" Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1 -> addExam();
+            case 2 -> removeExam();
+            case 3 -> editExam();
+            case 4 -> {
+                System.out.println(" Exit ");
+                return;
+            }
+            default -> System.out.println("Invalid option .");
+
+        }
+    }
+
+    private void editExam() {
+        System.out.println(" ------------ Update Exam Pages --------");
+        System.out.println(" Enter Exam ID for Edit: ");
+        Long examId = scanner.nextLong();
+
+
+        Exam exitingExam = examService.findById(Exam.class, examId);
+        if (exitingExam == null) {
+            System.out.println("User not found!");
+        }
+
+        System.out.println(" Information Of currentExam : " + exitingExam);
+        System.out.println("New Title: ");
+        String newName = scanner.next();
+        exitingExam.setTitle_Exam(newName);
+
+        System.out.println("New Description: ");
+        String newDescription = scanner.next();
+        exitingExam.setDescription_Exam(newDescription);
+
+        System.out.println("New Duration: ");
+        int newDuration = scanner.nextInt();
+        exitingExam.setDuration_Exam(newDuration);
+
+
+        examService.updateExam(exitingExam);
+
+        System.out.println("update successful!");
+
+
+    }
+
+    private void removeExam() {
+        System.out.println(" ------------ Remove Exam --------");
+        System.out.println(" Enter Exam ID for Remove: ");
+        Long examId = scanner.nextLong();
+
+        try {
+            examService.removeExam(examId);
+            System.out.println(" remove successful! ");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addExam() {
+        System.out.println(" ------------ Add Exam --------");
+        Exam exam = new Exam();
+
+        System.out.println("Enter Exam Title: ");
+        String titleExam = scanner.nextLine();
+        exam.setTitle_Exam(titleExam);
+
+        System.out.println("Enter Description: ");
+        String descriptionExam = scanner.nextLine();
+        exam.setDescription_Exam(descriptionExam);
+
+        System.out.println("Enter Duration: ");
+        int durationExam = scanner.nextInt();
+        exam.setDuration_Exam(durationExam);
+
+
+        try {
+            examService.addNewExam(exam);
+            System.out.println(" add exam successful!");
+        } catch (Exception e) {
+            System.out.println(" add exam failed!" + e.getMessage());
+        }
+
     }
 
     private void showCourseExam() {

@@ -53,6 +53,10 @@ public class Course   {
     @OneToMany(mappedBy = "course")
     private List<Exam> exams;
 
+    @ManyToMany(mappedBy = "courses")
+    private Set<Questions> questions = new HashSet<>();
+
+
     @Override
     public int hashCode() {
         return getClass().hashCode();

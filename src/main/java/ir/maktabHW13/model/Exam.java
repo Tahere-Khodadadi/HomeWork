@@ -15,6 +15,8 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 
+@Inheritance(strategy = InheritanceType.JOINED)
+
 public class Exam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +29,10 @@ public class Exam {
     private String description_Exam;
 
     @Column(nullable = false)
-    private Integer  duration_Exam;
+    private int duration_Exam;
 
     @ManyToOne
-    @JoinColumn(name = "course_id",nullable = false)
+    @JoinColumn(name = "course_id",nullable = true)
     private Course course;
 
 

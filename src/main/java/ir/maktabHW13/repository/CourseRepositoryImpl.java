@@ -82,7 +82,8 @@ public class CourseRepositoryImpl implements CourseRepository {
         } catch (Exception e) {
             throw new RuntimeException("remove course error", e);
         }
-    }
+
+}
 
 
     @Override

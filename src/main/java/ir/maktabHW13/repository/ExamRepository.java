@@ -7,4 +7,8 @@ import java.util.List;
 public interface ExamRepository extends BaseRepository {
 
     List<Exam> findAllCourseExams(Long examId);
+
+    void assignCourseToExam(Long examId, Long courseId);
+
+
 }

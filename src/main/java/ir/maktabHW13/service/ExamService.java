@@ -10,8 +10,14 @@ public interface ExamService {
 
     void removeExam(Long examId);
 
-    Exam updateExam(Exam exam );
+    Exam updateExam(Exam exam);
 
     List<Exam> findAll();
+
+    List<Exam> findAllByCourse(Long courseId);
+
+    Exam findById(Class<Exam> examClass, Long examId);
+
+    void assignCourseToExam(Long examId, Long courseId);
 
 }
