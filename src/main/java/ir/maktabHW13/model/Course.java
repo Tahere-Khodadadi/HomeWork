@@ -8,10 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
@@ -53,8 +50,8 @@ public class Course   {
     @OneToMany(mappedBy = "course")
     private List<Exam> exams;
 
-    @ManyToMany(mappedBy = "courses")
-    private Set<Questions> questions = new HashSet<>();
+    @OneToMany(mappedBy = "course",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Questions> questions = new ArrayList<>();
 
 
     @Override

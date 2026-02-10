@@ -105,7 +105,9 @@ public class ExamServiceImpl implements ExamService {
 
 
         Exam exam = examRepository.findById(Exam.class, examId);
+        examRepository.assignCourseToExam(examId, courseId);
             System.out.println("Exam assigned successfully");
+
 
     }
         catch (Exception e) {

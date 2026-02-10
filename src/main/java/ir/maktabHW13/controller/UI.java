@@ -92,12 +92,13 @@ public class UI {
 
     private void teacherDashboards(Long teacherId) {
         while (true) {
-
+             scanner.nextLine();
             System.out.println(" Teacher Dashboards: ");
             System.out.println(" 1. Show All Teacher Courses Page: ");
             System.out.println(" 2. Exam Pages : ");
-            System.out.println(" 3. Show All Course Exam Page: ");
-            System.out.println(" 4. Exit: ");
+            System.out.println(" 3. add Exam To Course : ");
+            System.out.println(" 4. Show All Course Exam Page: ");
+            System.out.println(" 5. Exit: ");
             System.out.println(" Choose an option: ");
 
             int choice = scanner.nextInt();
@@ -105,8 +106,9 @@ public class UI {
             switch (choice) {
                 case 1 -> showAllTeacherCourses(teacherId);
                 case 2 -> examPage();
-                case 3 -> showCourseExam();
-                case 4 -> {
+                case 3-> addExamToCourse();
+                case 4 -> showCourseExam();
+                case 5 -> {
                     System.out.println(" Exit ");
                     return;
                 }
@@ -115,6 +117,24 @@ public class UI {
             }
             scanner.nextLine();
         }
+    }
+
+    private void addExamToCourse() {
+        System.out.println();
+        System.out.println(" Add Exam To Course Page : ");
+        System.out.println(" Enter Exam ID : ");
+        Long examId = scanner.nextLong();
+        System.out.println(" Enter Course ID : ");
+        Long courseId = scanner.nextLong();
+
+        try {
+            examService.assignCourseToExam(examId, courseId);
+
+        }
+        catch (Exception e) {
+            throw  new RuntimeException(" Error to add exam to course " +e.getMessage());
+        }
+
     }
 
     private void examPage() {
@@ -140,6 +160,9 @@ public class UI {
     }
 
     private void editExam() {
+
+        System.out.println();
+
         System.out.println(" ------------ Update Exam Pages --------");
         System.out.println(" Enter Exam ID for Edit: ");
         Long examId = scanner.nextLong();
@@ -172,7 +195,9 @@ public class UI {
     }
 
     private void removeExam() {
+        System.out.println();
         System.out.println(" ------------ Remove Exam --------");
+
         System.out.println(" Enter Exam ID for Remove: ");
         Long examId = scanner.nextLong();
 
@@ -186,6 +211,7 @@ public class UI {
     }
 
     private void addExam() {
+        System.out.println();
         System.out.println(" ------------ Add Exam --------");
         Exam exam = new Exam();
 
@@ -212,6 +238,19 @@ public class UI {
     }
 
     private void showCourseExam() {
+        System.out.println();
+        System.out.println(" ------------ Course Exam --------");
+        System.out.println("1. Enter Course ID   : ");
+        Long courseId = scanner.nextLong();
+
+        try {
+            examService.findAllByCourse(courseId);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     private void showAllTeacherCourses(Long teacherId) {

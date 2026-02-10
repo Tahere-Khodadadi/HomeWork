@@ -6,17 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import java.util.HashSet;
-import java.util.Set;
 
-@Table(name = "questions")
 @Entity
+@Table(name = "questions")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 
-@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Questions {
 
     @Id
@@ -29,13 +27,13 @@ public abstract class Questions {
     @Column(nullable = false)
     private String descriptionQuestion;
 
-    @ManyToMany
+    @ManyToOne
     @JoinTable(
             name = "course_question",
             joinColumns = @JoinColumn(name = "question_id"),
-            inverseJoinColumns =@JoinColumn(name = "course_id")
+            inverseJoinColumns = @JoinColumn(name = "course_id")
     )
-    private Set<Course> courses=new HashSet<>();
+    private Course course;
 
     @Override
     public boolean equals(Object o) {
@@ -44,16 +42,17 @@ public abstract class Questions {
         Questions questions = (Questions) o;
         return id.equals(questions.id);
     }
+
     @Override
     public int hashCode() {
 
-        if(id!=null){
+        if (id != null) {
             return id.hashCode();
-        }
-        else {
+        } else {
             return super.hashCode();
         }
     }
+
     @Override
     public String toString() {
         return "Question{" +
