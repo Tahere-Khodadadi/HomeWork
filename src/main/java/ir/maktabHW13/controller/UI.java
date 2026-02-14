@@ -1,14 +1,18 @@
 package ir.maktabHW13.controller;
 
+import ir.maktabHW13.dto.DescriptionQuestionsDTO;
 import ir.maktabHW13.dto.UserSignUpDTO;
 import ir.maktabHW13.model.*;
 import ir.maktabHW13.repository.*;
 import ir.maktabHW13.service.CourseServiceImpl;
 import ir.maktabHW13.service.ExamServiceImpl;
+import ir.maktabHW13.service.QuestionServiceImpl;
 import ir.maktabHW13.service.UserServiceImpl;
 import ir.maktabHW13.util.JpaApplication;
+import org.h2.util.json.JsonConstructorUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,15 +21,18 @@ public class UI {
     private final UserRepository userRepository;
     private final CourseServiceImpl courseService;
     private final ExamServiceImpl examService;
+    private final QuestionServiceImpl questionService;
 
     Scanner scanner = new Scanner(System.in);
 
-    public UI(UserServiceImpl userService, CourseServiceImpl courseService, ExamServiceImpl examService) {
+    public UI(UserServiceImpl userService, CourseServiceImpl courseService, ExamServiceImpl examService
+            , QuestionServiceImpl questionService) {
         this.userService = userService;
 
         this.userRepository = new UserRepositoryImpl(new JpaApplication());
         this.courseService = courseService;
         this.examService = examService;
+        this.questionService = questionService;
 
     }
 
@@ -92,7 +99,7 @@ public class UI {
 
     private void teacherDashboards(Long teacherId) {
         while (true) {
-             scanner.nextLine();
+            scanner.nextLine();
             System.out.println(" Teacher Dashboards: ");
             System.out.println(" 1. Show All Teacher Courses Page: ");
             System.out.println(" 2. Exam Pages : ");
@@ -106,7 +113,7 @@ public class UI {
             switch (choice) {
                 case 1 -> showAllTeacherCourses(teacherId);
                 case 2 -> examPage();
-                case 3-> addExamToCourse();
+                case 3 -> addExamToCourse();
                 case 4 -> showCourseExam();
                 case 5 -> {
                     System.out.println(" Exit ");
@@ -130,9 +137,8 @@ public class UI {
         try {
             examService.assignCourseToExam(examId, courseId);
 
-        }
-        catch (Exception e) {
-            throw  new RuntimeException(" Error to add exam to course " +e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(" Error to add exam to course " + e.getMessage());
         }
 
     }
@@ -141,7 +147,7 @@ public class UI {
         System.out.println(" ------------ Exam Pages --------");
         System.out.println("1. Add Exam  : ");
         System.out.println("2. Remove Exam : ");
-        System.out.println("3. Update Exam : ");
+        System.out.println("3. Edit Exam : ");
         System.out.println("4. Exit: ");
         System.out.println(" Choose an option: ");
         int choice = scanner.nextInt();
@@ -160,36 +166,78 @@ public class UI {
     }
 
     private void editExam() {
-
+        System.out.println(" ------------ Edit Exam Pages --------");
+        System.out.println(" Enter Exam ID for Edit : ");
+        Long examId = scanner.nextLong();
         System.out.println();
 
-        System.out.println(" ------------ Update Exam Pages --------");
-        System.out.println(" Enter Exam ID for Edit: ");
-        Long examId = scanner.nextLong();
+        Exam exam = examService.findById(Exam.class, examId);
 
-
-        Exam exitingExam = examService.findById(Exam.class, examId);
-        if (exitingExam == null) {
-            System.out.println("User not found!");
+        if (exam == null) {
+            System.out.println("Exam not found.");
+            return;
         }
 
-        System.out.println(" Information Of currentExam : " + exitingExam);
-        System.out.println("New Title: ");
-        String newName = scanner.next();
-        exitingExam.setTitle_Exam(newName);
+        System.out.println("Current Exam Details: ");
+        System.out.println("Title: " + exam.getTitle_Exam());
+        System.out.println("Description: " + exam.getDescription_Exam());
+        System.out.println("Duration: " + exam.getDuration_Exam());
 
-        System.out.println("New Description: ");
-        String newDescription = scanner.next();
-        exitingExam.setDescription_Exam(newDescription);
+        addQuestionToExam(exam);
+    }
 
-        System.out.println("New Duration: ");
-        int newDuration = scanner.nextInt();
-        exitingExam.setDuration_Exam(newDuration);
+    private void addQuestionToExam(Exam exam) {
+        System.out.println(" ------------ Add Question to Exam --------");
+        System.out.println(" What question would you like to add?");
+        System.out.println(" 1. Description Question");
+        System.out.println(" 2. MultiChoice Question");
+
+        int questionType = scanner.nextInt();
+
+        if (questionType == 1) {
+            descriptionQuestionAdd(exam);
+        } else if (questionType == 2) {
+            multipleQuestionAdd(exam);
+        } else {
+            System.out.println("Invalid option.");
+        }
+    }
 
 
-        examService.updateExam(exitingExam);
+    private void descriptionQuestionAdd(Exam exam) {
 
-        System.out.println("update successful!");
+
+        scanner.nextLine();
+        System.out.println(" Multiple Questions Add Page : ");
+        DescriptionQuestionsDTO descriptionQuestionDto = new DescriptionQuestionsDTO();
+
+        System.out.println(" Enter Question Title: ");
+        String questionTitle = scanner.nextLine();
+        System.out.println(" Enter Question Description: ");
+        String questionDescription = scanner.nextLine();
+
+       descriptionQuestionDto.setTitle(questionTitle);
+       descriptionQuestionDto.setQuestionText(questionDescription);
+
+        if (descriptionQuestionDto.getExam() == null) {
+            descriptionQuestionDto.setExam(new ArrayList<>());
+        }
+        descriptionQuestionDto.getExam().add(exam);
+
+        if (exam.getQuestions() == null) {
+            exam.setQuestions(new ArrayList<>());
+        }
+        exam.getQuestions().add(descriptionQuestionDto);
+
+        questionService.addDescriptionQuestion(descriptionQuestionDto);
+
+        examService.updateExam(exam);
+
+        System.out.println("Question added successfully to the exam!");
+
+    }
+
+    private void multipleQuestionAdd(Exam exam) {
 
 
     }
@@ -245,8 +293,7 @@ public class UI {
 
         try {
             examService.findAllByCourse(courseId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

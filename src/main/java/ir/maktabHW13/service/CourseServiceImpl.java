@@ -17,7 +17,6 @@ public class CourseServiceImpl implements CourseService {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
     }
-
     @Override
     public void addCourse(Course course) {
         userRepository.save(course);

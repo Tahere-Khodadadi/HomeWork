@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,6 +35,14 @@ public class Exam {
     @ManyToOne
     @JoinColumn(name = "course_id",nullable = true)
     private Course course;
+
+   @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+   @JoinTable(
+                   name = "exam_question",
+           joinColumns=@JoinColumn(name="exam_id"),
+           inverseJoinColumns = @JoinColumn(name = "question_id")
+            )
+   private List<Questions> questions=new ArrayList<>();
 
 
 }

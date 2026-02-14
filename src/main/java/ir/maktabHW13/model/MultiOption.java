@@ -18,6 +18,9 @@ public class MultiOption {
     @Column(name = "option_text")
     private String optionText;
 
+    @Column(name = "option_number")
+    private Integer optionNumber;
+
     @ManyToOne
     @JoinColumn(name = "question_id")
     private MultipleChoiceQuestion questions;

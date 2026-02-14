@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 @Entity
 @Table(name = "multiple_choice_questions")
+
 @Setter
 @Getter
 @ToString(callSuper=true)

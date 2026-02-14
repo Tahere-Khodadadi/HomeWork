@@ -16,7 +16,7 @@ import java.util.*;
 @Setter
 @NoArgsConstructor
 @Table(name = "courses")
-public class Course   {
+public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,22 +37,26 @@ public class Course   {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "course_student",
-            joinColumns =@ JoinColumn(name = "course_id")
+            joinColumns = @JoinColumn(name = "course_id")
             , inverseJoinColumns = @JoinColumn(name = "student_id")
     )
 
-    private Set<User> students  =new HashSet<>();
+    private Set<User> students = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "teacher_id",nullable = true)
+    @JoinColumn(name = "teacher_id", nullable = true)
     private User teacher;
 
     @OneToMany(mappedBy = "course")
     private List<Exam> exams;
 
-    @OneToMany(mappedBy = "course",cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(
+            name = "course_question",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "question_id")
+    )
     private List<Questions> questions = new ArrayList<>();
-
 
     @Override
     public int hashCode() {
@@ -61,9 +65,9 @@ public class Course   {
 
     @Override
     public boolean equals(Object obj) {
-        if(this==obj) return true;
-        if(!(obj instanceof Course)) return false;
-        Course course = (Course)obj;
+        if (this == obj) return true;
+        if (!(obj instanceof Course)) return false;
+        Course course = (Course) obj;
         return id != null && id.equals(course.id);
     }
 
@@ -74,8 +78,8 @@ public class Course   {
                 ", title = '" + title + '\'' +
                 ", identifier ='" + identifier + '\'' +
                 ", startDate ='" + startDate + '\'' +
-                ", endDate =" + endDate +'\''+
+                ", endDate =" + endDate + '\'' +
 
                 '}';
     }
-    }
+}

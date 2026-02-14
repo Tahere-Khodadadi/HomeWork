@@ -1,6 +1,12 @@
 package ir.maktabHW13.repository;
 
+import ir.maktabHW13.model.Questions;
+
+import java.util.List;
+
 public interface QuestionRepository extends BaseRepository{
 
-    void searchByTitleQuestion(String titleQuestion);
+    Questions searchByTitleQuestion(String titleQuestion);
+
+
 }

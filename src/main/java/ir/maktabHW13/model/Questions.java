@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "questions")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -25,15 +28,13 @@ public abstract class Questions {
     private String title;
 
     @Column(nullable = false)
-    private String descriptionQuestion;
+    private String questionText;
 
-    @ManyToOne
-    @JoinTable(
-            name = "course_question",
-            joinColumns = @JoinColumn(name = "question_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    private Course course;
+
+
+
+    @ManyToMany (mappedBy = "questions")
+    private List<Exam> exam=new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
@@ -42,6 +43,7 @@ public abstract class Questions {
         Questions questions = (Questions) o;
         return id.equals(questions.id);
     }
+
 
     @Override
     public int hashCode() {
@@ -58,7 +60,7 @@ public abstract class Questions {
         return "Question{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", description='" + descriptionQuestion + '\'' +
+                ", questionText='" + questionText + '\'' +
                 '}';
     }
 }
