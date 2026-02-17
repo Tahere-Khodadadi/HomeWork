@@ -1,22 +1,28 @@
 package ir.maktabHW13.repository;
 
-import ir.maktabHW13.model.Course;
-import ir.maktabHW13.model.Exam;
+import ir.maktabHW13.model.*;
 import ir.maktabHW13.service.ExamServiceImpl;
 import ir.maktabHW13.util.JpaApplication;
 import ir.maktabHW13.util.TransactionManager;
 import jakarta.persistence.EntityManager;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ExamRepositoryImpl implements ExamRepository {
 
     private JpaApplication jpaApplication;
+    private CourseRepository courseRepository;
 
-    public ExamRepositoryImpl(JpaApplication jpaApplication) {
+    public ExamRepositoryImpl(JpaApplication jpaApplication
+            , CourseRepository courseRepository) {
         this.jpaApplication = jpaApplication;
+        this.courseRepository = courseRepository;
     }
+
 
     @Override
     public <T> void save(T entity) {
@@ -76,27 +82,39 @@ public class ExamRepositoryImpl implements ExamRepository {
                 em.getTransaction().rollback();
             }
             throw new RuntimeException("remove exam error", e);
-        }
-    finally {
+        } finally {
             em.close();
         }
     }
-
 
     @Override
     public List<Exam> findAllCourseExams(Long courseId) {
         List<Exam> exams;
         try {
-            exams = TransactionManager.execute(entityManager ->
-                    entityManager.createQuery("select e from Exam e where e.course.id = :courseId", Exam.class)
-                            .setParameter("courseId", courseId)
-                            .getResultList()
-            );
+            exams = TransactionManager.execute(entityManager -> {
+
+                List<Exam> examList = entityManager.createQuery(
+                                "SELECT e FROM Exam e " +
+                                        "LEFT JOIN FETCH e.questions q " +
+                                        "WHERE e.course.id = :courseId", Exam.class)
+                        .setParameter("courseId", courseId)
+                        .getResultList();
+
+                for (Exam exam : examList) {
+                    for (Questions q : exam.getQuestions()) {
+                        if (q instanceof MultipleChoiceQuestion) {
+                            MultipleChoiceQuestion mcq = (MultipleChoiceQuestion) q;
+                            System.out.println("options are : " + mcq.getOptions().toString());
+                        }
+                    }
+                }
+
+                return examList;
+            });
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("findAllCourseExams error", e);
         }
-
-
         return exams;
     }
 
@@ -124,5 +142,43 @@ public class ExamRepositoryImpl implements ExamRepository {
         });
 
 
+    }
+
+    @Override
+    public List<Questions> getQuestionByCourseId(Long courseId) {
+        return TransactionManager.execute(entityManager -> {
+
+            List<Exam> exams = entityManager.createQuery(
+                            "select e from Exam e " +
+                                    "LEFT JOIN FETCH e.questions " +
+                                    "where e.course.id = :courseId", Exam.class)
+                    .setParameter("courseId", courseId)
+                    .getResultList();
+
+            List<Questions> allQuestions = new ArrayList<>();
+            for (Exam exam : exams) {
+                allQuestions.addAll(exam.getQuestions());
+            }
+
+            return allQuestions;
+        });
+    }
+
+    @Override
+    public List<Exam> getExamByCourseId(Long courseId) {
+
+
+        Course course = courseRepository.findById(Course.class, courseId);
+        if (course == null || courseId == null) {
+
+            System.out.println("course is null ");
+            return Collections.emptyList();
+        }
+        return TransactionManager.execute(
+                entityManager -> entityManager.createQuery(
+                                "select e from Exam e where " +
+                                        "e.course.id =: courseId", Exam.class
+                        ).setParameter("courseId", courseId)
+                        .getResultList());
     }
 }

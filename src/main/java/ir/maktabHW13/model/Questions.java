@@ -38,7 +38,7 @@ public abstract class Questions {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) return true;//check the refrence Identifier in heap
         if (o == null || getClass() != o.getClass()) return false;
         Questions questions = (Questions) o;
         return id.equals(questions.id);
@@ -63,4 +63,5 @@ public abstract class Questions {
                 ", questionText='" + questionText + '\'' +
                 '}';
     }
+
 }

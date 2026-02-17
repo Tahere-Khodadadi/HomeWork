@@ -95,7 +95,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
         Questions question;
         try {
-           question=questionRepository.searchByTitleQuestion(titleQuestion);
+            question = questionRepository.searchByTitleQuestion(titleQuestion);
             System.out.println("question searched");
         } catch (Exception e) {
             throw new RuntimeException(" searchByTitleQuestion is failed : " + e.getMessage());
@@ -103,26 +103,6 @@ public class QuestionServiceImpl implements QuestionService {
         return question;
     }
 
-
-    @Override
-    public List<Questions> bankQuestions(Long courseId) {
-        if (courseId == null) {
-            System.out.println("courseId is null");
-            return new ArrayList<>();
-        }
-        List<Questions> questions = new ArrayList<>();
-        try {
-            Course course = courseRepository.findById(Course.class, courseId);
-
-
-            questions = course.getQuestions();
-
-            System.out.println(" this question are in bankQuestions : " + questions);
-        } catch (Exception e) {
-            throw new RuntimeException(" error to show bankQuestions with courseId : " + courseId);
-        }
-        return questions;
-    }
 
 
 

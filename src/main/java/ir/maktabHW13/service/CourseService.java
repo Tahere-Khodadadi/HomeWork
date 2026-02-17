@@ -20,5 +20,6 @@ public interface CourseService {
 
     void showDetailCourse(Long courseId);
 
-    List<Course> showTeacherCourse(Long teacherId );
+    void showTeacherCourse(Long teacherId );
+
 }

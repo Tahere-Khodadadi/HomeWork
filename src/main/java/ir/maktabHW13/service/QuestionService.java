@@ -19,7 +19,5 @@ public interface QuestionService {
 
     Questions searchByTitleQuestion(String titleQuestion);
 
-    List<Questions> bankQuestions(Long courseId);
-
 
 }

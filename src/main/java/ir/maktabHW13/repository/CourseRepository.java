@@ -15,4 +15,6 @@ public interface CourseRepository extends BaseRepository {
     void  getDetailCourse(Long courseId);
 
      List<Course> findCourseByTeacherId(Long teacherId);
-    }
+
+
+}

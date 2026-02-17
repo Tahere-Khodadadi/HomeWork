@@ -1,10 +1,7 @@
 package ir.maktabHW13;
 import ir.maktabHW13.controller.UI;
 import ir.maktabHW13.repository.*;
-import ir.maktabHW13.service.CourseServiceImpl;
-import ir.maktabHW13.service.ExamServiceImpl;
-import ir.maktabHW13.service.QuestionServiceImpl;
-import ir.maktabHW13.service.UserServiceImpl;
+import ir.maktabHW13.service.*;
 import ir.maktabHW13.util.JpaApplication;
 
 public class MainApp {
@@ -20,13 +17,15 @@ public class MainApp {
 
          QuestionRepository questionRepository=new QuestionRepositoryImpl(new JpaApplication());
 
-         ExamRepository examRepository = new ExamRepositoryImpl(new JpaApplication());
+         ExamRepository examRepository = new ExamRepositoryImpl(new JpaApplication(),courseRepository);
         ExamServiceImpl examService = new ExamServiceImpl(examRepository,questionRepository);
 
 
         QuestionServiceImpl questionService=new QuestionServiceImpl(questionRepository,courseRepository);
 
-        UI systemUI = new UI(userService, courseService,examService,questionService);
+         FileServiceImpl fileService=new FileServiceImpl(examRepository);
+
+        UI systemUI = new UI(userService, courseService,examService,questionService,fileService);
           userService.SignUpAdmin();
         systemUI.StartMenu();
     }

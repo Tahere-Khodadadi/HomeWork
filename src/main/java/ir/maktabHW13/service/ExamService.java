@@ -1,8 +1,11 @@
+
 package ir.maktabHW13.service;
 
 import ir.maktabHW13.model.Course;
 import ir.maktabHW13.model.Exam;
+import ir.maktabHW13.model.Questions;
 
+import java.io.File;
 import java.util.List;
 
 public interface ExamService {
@@ -19,5 +22,12 @@ public interface ExamService {
     Exam findById(Class<Exam> examClass, Long examId);
 
     void assignCourseToExam(Long examId, Long courseId);
+
+    void addQuestionToExam(Long examId,Questions question);
+
+     List<Questions> getQuestionsByCourse(Long courseId) ;
+
+    List<Exam> showStudentCourseExams(Long courseId);
+
 
 }

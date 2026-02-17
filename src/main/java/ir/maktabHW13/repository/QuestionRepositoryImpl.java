@@ -21,7 +21,6 @@ public class QuestionRepositoryImpl implements QuestionRepository {
     public <T> void save(T entity) {
         try {
 
-
             if (entity instanceof DescriptionQuestion
                     || entity instanceof MultipleChoiceQuestion) {
                 TransactionManager.executeForPersist(

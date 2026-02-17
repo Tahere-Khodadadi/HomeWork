@@ -83,7 +83,7 @@ public class CourseRepositoryImpl implements CourseRepository {
             throw new RuntimeException("remove course error", e);
         }
 
-}
+    }
 
 
     @Override
@@ -216,5 +216,6 @@ public class CourseRepositoryImpl implements CourseRepository {
                         ).setParameter("teacher_id", teacherId)
                         .getResultList());
     }
+
 
 }

@@ -4,7 +4,6 @@ import ir.maktabHW13.model.Course;
 
 import ir.maktabHW13.repository.CourseRepository;
 import ir.maktabHW13.repository.UserRepository;
-import org.h2.command.ddl.CreateTable;
 
 import java.util.List;
 
@@ -97,7 +96,7 @@ public class CourseServiceImpl implements CourseService {
 
     }
     @Override
-    public List<Course> showTeacherCourse(Long teacherId) {
+    public void showTeacherCourse(Long teacherId) {
 
         List<Course> listCourses = courseRepository.findCourseByTeacherId(teacherId);
 
@@ -106,6 +105,6 @@ public class CourseServiceImpl implements CourseService {
             System.out.println(" no courses for this teacher ");
         }
 
-        return listCourses;
     }
+
 }
