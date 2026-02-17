@@ -17,7 +17,7 @@ import java.time.LocalTime;
 @ToString
 @NoArgsConstructor
 
-public class StudentExams {
+public class StudentExam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,12 +36,10 @@ public class StudentExams {
     private LocalTime submitDate;
 
     @Enumerated(EnumType.STRING)
-    private ExamStatus examStatus;
+    private ExamStatus examStatus=ExamStatus.NotStarted;
 
     private int score;
     private Integer currentQuestionIndex = 0; //  default for first Question
-    private int totalScore = 0;
-
 
 }
 
