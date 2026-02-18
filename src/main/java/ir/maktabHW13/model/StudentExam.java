@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+
 
 @Entity
 @Table(name = "student_exam")
@@ -32,7 +33,7 @@ public class StudentExam {
 
 
     private LocalTime startExamTime;
-    private LocalTime endExamTime=startExamTime;
+    private LocalTime endExamTime;
     private LocalTime submitDate;
 
     @Enumerated(EnumType.STRING)
@@ -40,6 +41,10 @@ public class StudentExam {
 
     private int score;
     private Integer currentQuestionIndex = 0; //  default for first Question
+
+
+    @OneToMany(mappedBy = "answer")
+    private List<Answer> answers;
 
 }
 

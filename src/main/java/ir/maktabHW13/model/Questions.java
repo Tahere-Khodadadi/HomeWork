@@ -63,5 +63,6 @@ public abstract class Questions {
                 ", questionText='" + questionText + '\'' +
                 '}';
     }
-
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answers=new ArrayList<>();
 }

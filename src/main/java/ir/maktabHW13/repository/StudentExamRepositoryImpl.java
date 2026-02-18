@@ -1,14 +1,58 @@
 package ir.maktabHW13.repository;
 
 import ir.maktabHW13.model.ExamStatus;
+import ir.maktabHW13.model.StudentExam;
 import ir.maktabHW13.util.TransactionManager;
 import jakarta.persistence.NoResultException;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class StudentExamImpl implements StudentExam {
+public class StudentExamRepositoryImpl implements StudentExamRepository {
+
+
+
+
     @Override
-    public void findStudentExams(Long studentId, Long examId) {
+    public void update(StudentExam studentExam) {
+        if (studentExam == null) {
+            throw new IllegalArgumentException("StudentExam cannot be null");
+        }
+
+        TransactionManager.execute(entityManager -> {
+            return entityManager.merge(studentExam);
+        });
+    }
+
+    @Override
+    public StudentExam findById(Long id) {
+        try {
+            return TransactionManager.execute(entityManager ->
+                    entityManager.find(StudentExam.class, id));
+        } catch (Exception e) {
+            throw new RuntimeException("Find student exam by id failed: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void save(StudentExam studentExam) {
+        if (studentExam == null) {
+            throw new IllegalArgumentException("StudentExam cannot be null");
+        }
+        try {
+         TransactionManager.execute(entityManager -> {
+                return entityManager.merge(studentExam);
+         });
+
+        }catch (Exception e) {
+            throw new RuntimeException("Save student exam failed: " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public List<StudentExam> findStudentExams(Long studentId, Long examId) {
         List<StudentExam> studentExams;
         try {
 
@@ -19,20 +63,20 @@ public class StudentExamImpl implements StudentExam {
                             setParameter("studentId", studentId).setParameter("examId", examId)
                             .getResultList());
 
-
         } catch (Exception e) {
             throw new RuntimeException(" find student exams failed");
         }
         if (studentExams == null) {
             throw new IllegalArgumentException("studentExams is null");
         }
-        System.out.println("studentExams details : " + studentExams);
+        return studentExams;
     }
 
     @Override
     public List<StudentExam> findInProgressByStudentExam(Long studentId) {
+        List<StudentExam> studentExams;
         try {
-            return TransactionManager.execute(
+            studentExams= TransactionManager.execute(
                     entityManager -> entityManager.createQuery(
                                     "select  se from StudentExam se " +
                                             "where se.student.id =:studentId" +
@@ -48,6 +92,7 @@ public class StudentExamImpl implements StudentExam {
             throw new RuntimeException(" find student exams failed");
 
         }
+        return  studentExams;
     }
 
     @Override
@@ -55,11 +100,11 @@ public class StudentExamImpl implements StudentExam {
         if (examId == null || studentId == null) {
             throw new IllegalArgumentException("examId  or studentId is null");
         }
-        Number participant = (Number) TransactionManager.execute(
+        Long participant = TransactionManager.execute(
                 entityManager -> entityManager.createQuery(
                                 "select count (se) from StudentExam se where " +
                                         "se.student.id =:studentId and " +
-                                        "se.exam.id =:examId", StudentExam.class).
+                                        "se.exam.id =:examId", Long.class).
                         setParameter("studentId", studentId).
                         setParameter("examId", examId)
                         .getSingleResult());
@@ -67,4 +112,6 @@ public class StudentExamImpl implements StudentExam {
 
 
     }
+
+
 }

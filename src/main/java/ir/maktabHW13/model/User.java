@@ -59,5 +59,5 @@ public class User {
                 ", code = '" + code + '\'' +
                 " } ";
     }
+
 }
-//cascade when we use that do changing in parent you want effect on children
