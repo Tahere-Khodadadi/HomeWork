@@ -37,7 +37,7 @@ public class StudentExam {
     private LocalTime submitDate;
 
     @Enumerated(EnumType.STRING)
-    private ExamStatus examStatus=ExamStatus.NotStarted;
+    private ExamStatus examStatus = ExamStatus.NotStarted;
 
     private int score;
     private Integer currentQuestionIndex = 0; //  default for first Question
@@ -46,6 +46,40 @@ public class StudentExam {
     @OneToMany(mappedBy = "answer")
     private List<Answer> answers;
 
+    @OneToMany(mappedBy = "exam")
+    private List<Questions> questions;
+
+
+    public Questions getNextQuestion() {
+        if (currentQuestionIndex + 1 < questions.size()) {
+            Questions next = questions.get(currentQuestionIndex + 1);//return next question
+
+            return next.getNextQuestion();
+        }
+        return null;
+
+    }
+
+    public Questions getPreviousQuestion() {
+        if (currentQuestionIndex - 1 >= 0) {
+            Questions previous = questions.get(currentQuestionIndex - 1);
+            return previous.getPreviousQuestion();
+        }
+        return null;
+    }
+
+    public void moveNextQuestion() {
+        if (currentQuestionIndex + 1 < questions.size()) {
+            currentQuestionIndex++;
+        }
+
+    }
+
+    public void movePreviousQuestion() {
+        if (currentQuestionIndex - 1 >= 0) {
+            currentQuestionIndex--;
+        }
+    }
 }
 
 

@@ -1,9 +1,7 @@
 package ir.maktabHW13.service;
 
-import ir.maktabHW13.model.Exam;
-import ir.maktabHW13.model.ExamStatus;
-import ir.maktabHW13.model.StudentExam;
-import ir.maktabHW13.model.User;
+import ir.maktabHW13.model.*;
+import ir.maktabHW13.repository.AnswerRepository;
 import ir.maktabHW13.repository.ExamRepository;
 import ir.maktabHW13.repository.StudentExamRepository;
 import ir.maktabHW13.repository.UserRepository;
@@ -18,12 +16,15 @@ public class StudentExamServiceImpl implements StudentExamService {
     private StudentExamRepository studentExamRepository;
     private ExamRepository examRepository;
     private UserRepository userRepository;
+    private AnswerRepository answerRepository;
 
     public void setStudentExamRepository(StudentExamRepository studentExamRepository
-            , ExamRepository examRepository, UserRepository userRepository) {
+            , ExamRepository examRepository, UserRepository userRepository
+            , AnswerRepository answerRepository) {
         this.studentExamRepository = studentExamRepository;
         this.examRepository = examRepository;
         this.userRepository = userRepository;
+        this.answerRepository = answerRepository;
     }
 
 
@@ -36,11 +37,16 @@ public class StudentExamServiceImpl implements StudentExamService {
         }
 
         StudentExam existingStudentExam = (StudentExam) studentExamRepository.findStudentExams(studentId, examId);
-        if (existingStudentExam != null && existingStudentExam.getExamStatus() == ExamStatus.InProgress) {
-            return existingStudentExam;
-        } else if (existingStudentExam.getExamStatus() == ExamStatus.Finished) {
-            throw new RuntimeException("you before finish exam ");
+        if (existingStudentExam != null) {
 
+
+            if (existingStudentExam.getExamStatus() == ExamStatus.InProgress) {
+                return existingStudentExam;
+
+            } else if (existingStudentExam.getExamStatus() == ExamStatus.Finished) {
+                throw new RuntimeException("you before finish exam ");
+
+            }
         }
         Exam exam = examRepository.findById(Exam.class, examId);
         User student = userRepository.findById(User.class, studentId);
@@ -74,14 +80,14 @@ public class StudentExamServiceImpl implements StudentExamService {
 
                 if (remaining.isNegative() || remaining.isZero()) {
                     System.out.println(" end time exam and exam is finish ");
-                    endTimeExam(studentExam.getStudent().getId(), studentExam.getExam().getId());
+                    endExam(studentExam.getStudent().getId(), studentExam.getExam().getId());
                     break;
                 }
                 updateRemainingTime(remaining);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    System.out.println("sleep interrupted"+e.getMessage());
+                    System.out.println("sleep interrupted" + e.getMessage());
                 }
             }
         });
@@ -89,14 +95,14 @@ public class StudentExamServiceImpl implements StudentExamService {
     }
 
     private void updateRemainingTime(Duration remaining) {
-        int minus= Math.toIntExact(remaining.toMinutes());
-        int second= Math.toIntExact(remaining.toSeconds()%60);
+        int minus = Math.toIntExact(remaining.toMinutes());
+        int second = Math.toIntExact(remaining.toSeconds() % 60);
 
-        System.out.println("minus:"+minus+" second:"+second);
+        System.out.println("minus:" + minus + " second:" + second);
     }
 
     @Override
-    public void endTimeExam(Long studentId, Long examId) {
+    public void endExam(Long studentId, Long examId) {
         StudentExam studentExam = (StudentExam) studentExamRepository.findStudentExams(studentId, examId);
         if (studentExam == null || studentExam.getExamStatus() == ExamStatus.Finished) {
             throw new RuntimeException("Exam not in progress or already finished.");
@@ -105,8 +111,13 @@ public class StudentExamServiceImpl implements StudentExamService {
         studentExam.setExamStatus(ExamStatus.Finished);
         studentExam.setEndExamTime(LocalTime.now());
 
-        studentExamRepository.save(studentExam);
+        if (studentExam.getAnswers() != null && !studentExam.getAnswers().isEmpty()) {
+            for (Answer answer : studentExam.getAnswers()) {
+                answerRepository.addAnswer(answer);
+            }
+        }
 
+        studentExamRepository.save(studentExam);
     }
 
 

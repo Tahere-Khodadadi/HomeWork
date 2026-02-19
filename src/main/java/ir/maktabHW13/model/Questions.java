@@ -65,4 +65,14 @@ public abstract class Questions {
     }
     @OneToMany(mappedBy = "question")
     private List<Answer> answers=new ArrayList<>();
+
+
+    @ManyToOne
+    @JoinColumn(name = "previous_question_id")
+    private Questions previousQuestion;
+
+    @ManyToOne
+    @JoinColumn(name = "next_question_id")
+    private Questions nextQuestion;
+
 }

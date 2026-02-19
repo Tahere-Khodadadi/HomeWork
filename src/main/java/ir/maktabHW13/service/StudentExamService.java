@@ -8,8 +8,8 @@ public interface StudentExamService {
 
 
     void startTimeExam(int duration, StudentExam studentExam);
-    void endTimeExam(Long studentId, Long ExamId);
 
+    void endExam(Long studentId, Long ExamId);
 
 
 }
