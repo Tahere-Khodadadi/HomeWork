@@ -8,8 +8,7 @@ public interface AnswerRepository {
 
     List<Answer> findByQuestionId(Long questionId);
 
-    Answer findByStudentExamAndQuestion(Long studentExamId,Long questionId);
-
+     List<Answer> findByStudentExamId(Long studentExamId);
     void addAnswer(Answer answer);
 
     void updateAnswer(Answer answer);

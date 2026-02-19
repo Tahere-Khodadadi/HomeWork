@@ -15,4 +15,8 @@ import lombok.ToString;
 public class DescriptionQuestion extends  Questions {
 
 
+    @Override
+    public int calculateCorrectAnswer(String answerStudent) {
+        return 0;
+    }
 }

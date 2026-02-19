@@ -2,6 +2,7 @@ package ir.maktabHW13.repository;
 
 import ir.maktabHW13.model.ExamStatus;
 import ir.maktabHW13.model.StudentExam;
+import ir.maktabHW13.util.JpaApplication;
 import ir.maktabHW13.util.TransactionManager;
 import jakarta.persistence.NoResultException;
 
@@ -11,7 +12,11 @@ import java.util.List;
 
 public class StudentExamRepositoryImpl implements StudentExamRepository {
 
+private JpaApplication jpaApplication;
 
+public StudentExamRepositoryImpl(JpaApplication jpaApplication) {
+    this.jpaApplication=jpaApplication;
+}
 
 
     @Override
@@ -110,8 +115,5 @@ public class StudentExamRepositoryImpl implements StudentExamRepository {
                         .getSingleResult());
         return participant != null || participant.doubleValue() > 0;//return true
 
-
     }
-
-
 }

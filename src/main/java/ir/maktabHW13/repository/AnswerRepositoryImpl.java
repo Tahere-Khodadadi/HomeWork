@@ -1,6 +1,7 @@
 package ir.maktabHW13.repository;
 
 import ir.maktabHW13.model.Answer;
+import ir.maktabHW13.util.JpaApplication;
 import ir.maktabHW13.util.TransactionManager;
 import jakarta.persistence.NoResultException;
 
@@ -9,33 +10,36 @@ import java.util.List;
 
 public class AnswerRepositoryImpl implements AnswerRepository {
 
+
+    private JpaApplication jpaApplication;
+
+    public AnswerRepositoryImpl(JpaApplication jpaApplication) {
+        this.jpaApplication=jpaApplication;
+    }
     @Override
     public void addAnswer(Answer answer) {
         if (answer == null) {
             throw new NullPointerException("answer is null");
         }
-        // id ==0 means :answer is new
-        if (answer.getId() == 0) {
+
             TransactionManager.executeForPersist(entityManager -> entityManager.persist(answer));
             System.out.println("Answer added successfully");
 
-        } else {
-            TransactionManager.execute((entityManager ->
-                    entityManager.merge(answer)));
-            System.out.println("updated answer with id " + answer.getId());
-
         }
-    }
+
 
     @Override
     public void updateAnswer(Answer answer) {
 
+        if (answer == null || answer.getId() == null) {
+            throw new NullPointerException("answer is null");
+        }
             TransactionManager.execute(entityManager -> {
                 entityManager.merge(answer);
-                return null;
+                return answer;
             });
-        }
 
+    }
 
     @Override
     public List<Answer> findByQuestionId(Long questionId) {
@@ -50,18 +54,11 @@ public class AnswerRepositoryImpl implements AnswerRepository {
     }
 
     @Override
-    public Answer findByStudentExamAndQuestion(Long studentExamId, Long questionId) {
-        try {
-            return TransactionManager.execute(entityManager ->
-                    entityManager.createQuery(
-                                    "SELECT a FROM Answer a WHERE a.studentExam.id = :studentExamId AND a.question.id = :questionId",
-                                    Answer.class)
-                            .setParameter("studentExamId", studentExamId)
-                            .setParameter("questionId", questionId)
-                            .getSingleResult()
-            );
-        } catch (NoResultException e) {
-            return null;
-        }
+    public List<Answer> findByStudentExamId(Long studentExamId) {
+        return TransactionManager.execute(entityManager ->
+                entityManager.createQuery("select a from Answer a where a.studentExam.id = :studentExamId", Answer.class)
+                        .setParameter("studentExamId", studentExamId)
+                        .getResultList()
+        );
     }
 }

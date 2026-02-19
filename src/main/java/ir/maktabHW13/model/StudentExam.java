@@ -39,7 +39,7 @@ public class StudentExam {
     @Enumerated(EnumType.STRING)
     private ExamStatus examStatus = ExamStatus.NotStarted;
 
-    private int score;
+    private int totalScoreExam;
     private Integer currentQuestionIndex = 0; //  default for first Question
 
 
@@ -54,7 +54,7 @@ public class StudentExam {
         if (currentQuestionIndex + 1 < questions.size()) {
             Questions next = questions.get(currentQuestionIndex + 1);//return next question
 
-            return next.getNextQuestion();
+            return questions.get(currentQuestionIndex + 1);
         }
         return null;
 
@@ -63,7 +63,7 @@ public class StudentExam {
     public Questions getPreviousQuestion() {
         if (currentQuestionIndex - 1 >= 0) {
             Questions previous = questions.get(currentQuestionIndex - 1);
-            return previous.getPreviousQuestion();
+            return questions.get(currentQuestionIndex - 1);
         }
         return null;
     }
@@ -79,6 +79,33 @@ public class StudentExam {
         if (currentQuestionIndex - 1 >= 0) {
             currentQuestionIndex--;
         }
+    }
+
+    public void calculateTotalScore() {
+        int totalScore = 0;
+        if (answers == null || answers.isEmpty()) {
+            this.totalScoreExam = 0;
+            return;
+        }
+        for (Answer answer : answers) {
+            Questions question = answer.getQuestion();
+            if (question instanceof MultipleChoiceQuestion) {
+                String selectedOption = answer.getAnswerStudent();
+
+                int point=((MultipleChoiceQuestion) question).
+                        calculateCorrectAnswer(selectedOption);
+                answer.setScoreStudent(point);
+                totalScore+=point;
+
+            }
+            else if (question instanceof DescriptionQuestion) {
+                if(answer.getAnswerStudent()!=null) {
+                    totalScore+=answer.getScoreStudent();
+                }
+
+            }
+        }
+      this.totalScoreExam = totalScore;
     }
 }
 

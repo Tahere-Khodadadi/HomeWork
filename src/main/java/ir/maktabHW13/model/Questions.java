@@ -31,10 +31,8 @@ public abstract class Questions {
     private String questionText;
 
 
-
-
-    @ManyToMany (mappedBy = "questions")
-    private List<Exam> exam=new ArrayList<>();
+    @ManyToMany(mappedBy = "questions")
+    private List<Exam> exam = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
@@ -63,8 +61,9 @@ public abstract class Questions {
                 ", questionText='" + questionText + '\'' +
                 '}';
     }
+
     @OneToMany(mappedBy = "question")
-    private List<Answer> answers=new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
 
 
     @ManyToOne
@@ -75,4 +74,5 @@ public abstract class Questions {
     @JoinColumn(name = "next_question_id")
     private Questions nextQuestion;
 
+public abstract  int calculateCorrectAnswer(String answerStudent);
 }

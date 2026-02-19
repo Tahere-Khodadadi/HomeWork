@@ -21,11 +21,15 @@ public class UI {
     private final ExamServiceImpl examService;
     private final QuestionServiceImpl questionService;
     private final FileServiceImpl fileService;
+    private final AnswerServiceImpl answerService;
+    private final StudentExamServiceImpl studentExamService;
 
     Scanner scanner = new Scanner(System.in);
 
     public UI(UserServiceImpl userService, CourseServiceImpl courseService, ExamServiceImpl examService
-            , QuestionServiceImpl questionService, FileServiceImpl fileService) {
+            , QuestionServiceImpl questionService, FileServiceImpl fileService,
+              AnswerServiceImpl answerService
+              ,StudentExamServiceImpl studentExamService) {
         this.userService = userService;
 
         this.userRepository = new UserRepositoryImpl(new JpaApplication());
@@ -33,6 +37,8 @@ public class UI {
         this.examService = examService;
         this.questionService = questionService;
         this.fileService = fileService;
+        this.answerService = answerService;
+        this.studentExamService = studentExamService;
 
     }
 
@@ -476,6 +482,45 @@ public class UI {
 
     }
 
+    private void participateExam(Long studentId,Long examId) {
+        StudentExam studentExam = studentExamService.startExam(studentId, examId);
+        System.out.println("Exam started! Duration: " + studentExam.getExam().getDuration_Exam() + " minutes");
+
+        studentExamService.startTimeExam(studentExam.getExam().getDuration_Exam(), studentExam);
+
+
+        Questions currentQuestion = studentExam.getNextQuestion();
+        while (currentQuestion != null) {
+            System.out.println("\nQuestion: " + currentQuestion.getTitle());
+            System.out.println(currentQuestion.getQuestionText());
+
+            if (currentQuestion instanceof MultipleChoiceQuestion mcq) {
+                int i = 1;
+                for (MultiOption option : mcq.getOptions()) {
+                    System.out.println(i + ") " + option.getOptionText());
+                    i++;
+                }
+            }
+
+            System.out.print("Enter your answer: ");
+            String answerText = scanner.nextLine();
+
+            Answer answer = new Answer();
+            answer.setStudentExam(studentExam);
+            answer.setQuestion(currentQuestion);
+            answer.setAnswerStudent(answerText);
+
+            answerService.saveOrUpdateAnswer(answer);
+
+            studentExam.moveNextQuestion();
+            currentQuestion = studentExam.getNextQuestion();
+        }
+
+        studentExamService.endExam(studentId, examId);
+        System.out.println("Exam finished! Total Score: " + studentExam.getTotalScoreExam());
+
+    }
+
     private void showAllStudentsCourses(Long studentId) {
         System.out.println(" Show All Student's Courses: ");
         scanner.nextLine();
@@ -485,7 +530,9 @@ public class UI {
 
         List<Exam> examList = examService.showStudentCourseExams(courseId);
 
-        if (examList != null || !examList.isEmpty()) {
+        if (examList.isEmpty()) {
+            System.out.println("Not found any exams in this course.");
+        }
             for (Exam exam : examList) {
                 System.out.println(" Exams for the course id: " + courseId);
                 System.out.println(" Exam ID: " + exam.getId()
@@ -495,15 +542,12 @@ public class UI {
                 System.out.println("--------------------");
 
             }
-        }
-            else{
-                System.out.println("No exams found.");
-            }
+
 
                 scanner.nextLine();
                 System.out.println("Enter Exam ID for Participate Exam: ");
                 Long examId = scanner.nextLong();
-
+               participateExam(studentId,examId);
 
     }
 

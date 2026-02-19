@@ -17,7 +17,7 @@ public class Answer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
 
     @ManyToOne
@@ -28,7 +28,12 @@ public class Answer {
     @JoinColumn(name = "question_id")
     private Questions question;
 
-    @Column
-    private String answer;
+    @Column(nullable = false)
+    private String answerStudent;
+
+    private Integer scoreStudent;
+
+
+
 
 }

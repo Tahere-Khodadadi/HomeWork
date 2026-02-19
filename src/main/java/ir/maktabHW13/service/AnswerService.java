@@ -4,7 +4,5 @@ import ir.maktabHW13.model.Answer;
 
 public interface AnswerService {
 
-    void addAnswer(Answer answer);
-
-    void updateAnswer(Answer answer);
+     void saveOrUpdateAnswer(Answer answer);
 }

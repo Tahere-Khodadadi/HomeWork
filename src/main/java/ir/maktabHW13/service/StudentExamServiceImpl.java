@@ -5,6 +5,7 @@ import ir.maktabHW13.repository.AnswerRepository;
 import ir.maktabHW13.repository.ExamRepository;
 import ir.maktabHW13.repository.StudentExamRepository;
 import ir.maktabHW13.repository.UserRepository;
+import ir.maktabHW13.util.JpaApplication;
 import ir.maktabHW13.util.TransactionManager;
 
 import java.time.Duration;
@@ -12,13 +13,13 @@ import java.time.LocalTime;
 
 public class StudentExamServiceImpl implements StudentExamService {
 
-
-    private StudentExamRepository studentExamRepository;
+    private  StudentExamRepository studentExamRepository;
     private ExamRepository examRepository;
     private UserRepository userRepository;
     private AnswerRepository answerRepository;
 
-    public void setStudentExamRepository(StudentExamRepository studentExamRepository
+
+    public StudentExamServiceImpl(StudentExamRepository studentExamRepository
             , ExamRepository examRepository, UserRepository userRepository
             , AnswerRepository answerRepository) {
         this.studentExamRepository = studentExamRepository;
@@ -73,7 +74,9 @@ public class StudentExamServiceImpl implements StudentExamService {
         LocalTime endTime = LocalTime.now().plusMinutes(duration);
 
 //this is for reverse time
-        Thread t = new Thread(() -> {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
             while (LocalTime.now().isBefore(endTime)) {
                 //calculate time
                 Duration remaining = Duration.between(LocalTime.now(), endTime);
@@ -90,7 +93,8 @@ public class StudentExamServiceImpl implements StudentExamService {
                     System.out.println("sleep interrupted" + e.getMessage());
                 }
             }
-        });
+
+            }};
         t.start();
     }
 
@@ -116,7 +120,7 @@ public class StudentExamServiceImpl implements StudentExamService {
                 answerRepository.addAnswer(answer);
             }
         }
-
+        studentExam.calculateTotalScore();
         studentExamRepository.save(studentExam);
     }
 

@@ -24,5 +24,6 @@ public class MultiOption {
     @ManyToOne
     @JoinColumn(name = "question_id")
     private MultipleChoiceQuestion questions;
+
 }
 
